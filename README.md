@@ -9,7 +9,7 @@ Currently works on queries based on:
 - assets
 - extensions + properties
 
-Will soon work on queries for:
+Work in progress for queries related to:
 - returning time vs. given extension:property plots in Matplotlib
 - including more specific support for datasets such as:
   - NASADEM (topographic data)
