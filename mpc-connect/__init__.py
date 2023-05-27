@@ -25,24 +25,38 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     
     try:
         req_body = req.get_json()
-        dataset = req_body['dataset'] # ex: "landsat-c2-l2"
-        time_range = req_body['time_range'] # ex: 2020-12-01_2020-12-31 -- underscore delimiter
+        dataset = req_body['dataset']
+        time_range = req_body['time_range']
         if "bbox" in req_body:
-            bbox = req_body['bbox'] # -122.2751_47.5469_-121.9613_47.7458 -- underscore delimiter
+            bbox = req_body['bbox']
         elif "area_of_interest" in req_body:
             area_of_interest = req_body['area_of_interest']
 
-        asset = req_body['asset'] # ex: "rendered_preview" or "qa"
+        asset = req_body['asset']
         
-        ext = req_body['extension'] # ex: "eo", "view", "proj"
-        prop = req_body['property'] # ex: "cloud_cover" / "snow_cover" (eo), "transform" (proj)
+        ext = req_body['extension']
+        prop = req_body['property']
 
-        # for testing example values:
-        # dataset = landsat-c2-l2
-        # time_range = 2020-12-01/2020-12-31
-        # bbox = -122.2751_47.5469_-121.9613_47.7458
-        # extension = eo
-        # property = cloud_cover
+        # example tests:
+        # {
+        #     "dataset": "sentinel-2-l2a",
+        #     "time_range": "2020-01-01/2020-12-31",
+        #     "bbox": [-124.2751, 45.5469, -123.9613, 45.7458],
+        #     "asset": "rendered_preview",
+        #     "extension": "eo",
+        #     "property": "cloud_cover",
+        #     "plot": 24
+        # }
+
+        # {
+        #     "dataset": "landsat-c2-l2",
+        #     "time_range": "2020-12-01/2020-12-31",
+        #     "bbox": [-122.2751, 47.5469, -121.9613, 47.7458],
+        #     "asset": "rendered_preview",
+        #     "extension": "eo",
+        #     "property": "cloud_cover"
+        # }
+        #
     except (KeyError, json.JSONDecodeError) as e:
         return func.HttpResponse("Triggered successfully, but incomplete request body", status_code=400)
 
@@ -52,7 +66,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     # plots given extension:property against time
     if "plot" in req_body:
-        windows = req_body.get('plot') # ex: windows = 10
+        windows = req_body.get('plot')
         df = geopd.GeoDataFrame.from_features(items.to_dict())
         df["datetime"] = pd.to_datetime(df["datetime"])
         ts = df.set_index("datetime").sort_index()[f"{ext}:{prop}"].rolling(windows).mean()
